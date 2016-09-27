@@ -4,10 +4,10 @@
 	Date: 27 September 2016
 */
 
-stock: {
+stock: [{
 	group_id: int,
 	product_id: int,
-	transaction: {
+	transaction: [{
 		id: int,
 		time: timestamp,
 		name: string,
@@ -15,25 +15,25 @@ stock: {
 		unit_price: double,
 		amont: int,
 		remark: string
-	}
-}
+	}]
+}]
 
-group: {
+group: [{
 	id: int,
 	name: string,
 	description: string
-}
+}]
 
-product: {
+product: [{
 	id: int,
 	name: string,
 	description: string
-}
+}]
 
-unit: {
+unit: [{
 	id: int,
 	name: string,
 	converter_rate: double,
 	description: string
-}
+}]
 
