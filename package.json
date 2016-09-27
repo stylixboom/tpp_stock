@@ -1,0 +1,24 @@
+{
+  "name": "tpp_stock",
+  "version": "1.0.0",
+  "description": "A stock management for TPP.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stylixboom/tpp_stock.git"
+  },
+  "author": "Siriwat K.",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/stylixboom/tpp_stock/issues"
+  },
+  "homepage": "https://github.com/stylixboom/tpp_stock#readme",
+  "dependencies": {
+    "hashmap": "^2.0.6",
+    "monk": "^3.1.2"
+  }
+}
