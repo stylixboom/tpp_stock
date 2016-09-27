@@ -1,0 +1,39 @@
+/*
+	Title: Tpp stock structure
+	Designer: Siriwat Kasamwattanarote
+	Date: 27 September 2016
+*/
+
+stock: {
+	group_id: int,
+	product_id: int,
+	transaction: {
+		id: int,
+		time: timestamp,
+		name: string,
+		unit_id: int,
+		unit_price: double,
+		amont: int,
+		remark: string
+	}
+}
+
+group: {
+	id: int,
+	name: string,
+	description: string
+}
+
+product: {
+	id: int,
+	name: string,
+	description: string
+}
+
+unit: {
+	id: int,
+	name: string,
+	converter_rate: double,
+	description: string
+}
+
