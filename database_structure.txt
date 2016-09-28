@@ -10,11 +10,16 @@ stock: [{
 	transaction: [{
 		id: int,
 		time: timestamp,
-		name: string,
+		user_id: int,
+		customer_id: int,
+		transaction_direction: string,	// Buying/Selling type
+		product_id: int,
 		unit_id: int,
-		unit_price: double,
+		unit_price: double,				// Price per unit
 		amont: int,
-		remark: string
+		payment: string,				// Cash/Cheque/Credit
+		status: string,					// Paid/Unpaid
+		remark: string					// Any note
 	}]
 }]
 
@@ -35,5 +40,23 @@ unit: [{
 	name: string,
 	converter_rate: double,
 	description: string
+}]
+
+user: [{
+	id: int,
+	username: string,
+	password: string,					// Hashed password
+	name: string,
+	identity: string,
+	address: string,
+	status: string						// Activated/Revoked
+}]
+
+customer: [{
+	id: int,
+	name: string,
+	identity: string,
+	address: string,
+	status: string						// Activated/Revoked
 }]
 
