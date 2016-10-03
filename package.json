@@ -18,13 +18,17 @@
   },
   "homepage": "https://github.com/stylixboom/tpp_stock#readme",
   "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "express-session": "^1.14.1",
     "hashmap": "^2.0.6",
+    "marko": "^3.11.1",
     "mongoose": "^4.6.1",
     "monk": "^3.1.2",
+    "morgan": "^1.7.0",
     "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
     "socket.io": "^1.4.8"
   }
 }
