@@ -1,23 +1,5 @@
 // --------------- Generic function -----------------
-// Log timing functions
-function printLogTime() {
-
-    var curr_time = new Date();
-
-    var hour = curr_time.getHours();
-    hour = (hour < 10 ? "0" : "") + hour;
-
-    var min = curr_time.getMinutes();
-    min = (min < 10 ? "0" : "") + min;
-
-    var sec = curr_time.getSeconds();
-    sec = (sec < 10 ? "0" : "") + sec; // 0 padding
-
-    var msec = curr_time.getMilliseconds();
-    msec = (msec < 10 ? "00" : msec < 100 ? "0" : "") + msec;
-
-    return "[ " + curr_time.getUTCFullYear() + "-" + (curr_time.getUTCMonth() + 1) + "-" + (curr_time.getUTCDate() + 1) + " " + hour + ":" + min + ":" + sec + "." + msec + " ]";
-}
+var utils = require('./utils.js');
 
 // --------------- MongoDB initialize ---------------
 var DB_ADDR = '10.128.0.215';
@@ -26,33 +8,52 @@ var DB_NAME = 'tpp_stock';  // Database name
 
 var db = require('monk')((DB_ADDR + ":" + DB_PORT + '/' + DB_NAME), function (err) {
     if (err) {
-        console.log(printLogTime() + " " + "Error: Monk connection failed " + DB_ADDR + ":" + DB_PORT + '/' + DB_NAME);
+        console.log(utils.printLogTime() + " " + "Error: Monk connection failed " + DB_ADDR + ":" + DB_PORT + '/' + DB_NAME);
         console.log("Message: " + err);
         process.exit(1);
     } else {
-        console.log(printLogTime() + " " + "Connected to MongoDB " + DB_ADDR + ":" + DB_PORT + '/' + DB_NAME);
+        console.log(utils.printLogTime() + " " + "Connected to MongoDB " + DB_ADDR + ":" + DB_PORT + '/' + DB_NAME);
     }
 });
 
-// --------------- Hashmap initialize ---------------
-var HashMap = require('hashmap');
-
-
 // --------------- Express API server initialize ---------------
 var listening_ip = '0.0.0.0';
-var listening_port = 80;
+var listening_port = 8080;
 
 var express = require('express');
 var app = express();
 
-var server = app.listen(process.env.SKYBOT_PORT || listening_port, process.env.SKYBOT_IP || listening_ip, function () {
-    console.log(printLogTime() + ' TPP stock management service is now listening on %s:%s', server.address().address, server.address().port);
+var server = app.listen(process.env.SERV_PORT || listening_port, process.env.SERV_IP || listening_ip, function () {
+    console.log(utils.printLogTime() + ' TPP stock management service is now listening on %s:%s', server.address().address, server.address().port);
+});
+
+// Routes hot-reload
+const path = require('path');
+var templatesDir = __dirname + '/routes/test';
+require('marko/hot-reload').enable();
+require('fs').watch(templatesDir, function (event, filename) {
+    if (/\.marko$/.test(filename)) {
+        // Resolve the filename to a full template path:
+        var templatePath = path.join(templatesDir, filename);
+
+        console.log('Marko template modified: ', templatePath);
+
+        // Pass along the *full* template path to marko
+        require('marko/hot-reload').handleFileModified(templatePath);
+    }
 });
 
 // Express configure
+var logger = require('morgan');
+app.use(logger('dev'));
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/', express.static(__dirname + '/client_ui'));
+
+app.use('/', express.static(__dirname + '/routes/home'));
+
+// Configure routes
+var test = require(templatesDir + '/test');
+app.use('/test', test);
 
 // --------------- UserDB ----------------
 var mongoose = require('mongoose');
@@ -69,6 +70,25 @@ app.use(expressSession({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// -------------- Logged in user Instance ---------------
+passport.serializeUser(function (user, done) {
+    done(null, user._id);
+});
+
+passport.deserializeUser(function (id, done) {
+    User.findById(id, function (err, user) {
+        done(err, user);
+    });
+});
+
+var bCrypt = require('bcrypt-nodejs');
+var isValidPassword = function (user, password) {
+    return bCrypt.compareSync(password, user.password);
+}
+
+// --------------- Hashmap initialize ---------------
+var HashMap = require('hashmap');
+
 // --------------- Socket.IO ---------------
 var client_socket_info = new HashMap();
 var io = require('socket.io')(server);
@@ -76,10 +96,10 @@ io.on('connection', function (socket) {
     //var socketId = socket.id;
     var clientIp = socket.request.socket._peername.address;
     var clientPort = socket.request.socket._peername.port;
-    console.log(printLogTime() + ' New connection from IP: ' + clientIp + " Port: " + clientPort);
+    console.log(utils.printLogTime() + ' New connection from IP: ' + clientIp + " Port: " + clientPort);
 
     socket.on('login', function (data) {
-        console.log(printLogTime() + " Client login as a: " + data.mode);
+        console.log(utils.printLogTime() + " Client login as a: " + data.mode);
         socket.emit('set ip', { ip: clientIp });
 
         // Grap socket id to it's role
@@ -92,7 +112,7 @@ io.on('connection', function (socket) {
                 });
                 break;
             default:
-                console.log(printLogTime() + " Unknow role " + data.mode);
+                console.log(utils.printLogTime() + " Unknow role " + data.mode);
                 break;
         }
     });
@@ -106,23 +126,28 @@ io.on('connection', function (socket) {
     });
 
     socket.on('leave', function (client_info) {
-        console.log(printLogTime() + " Disconnecting from " + client_info.mode + " IP: " + client_info.ip);
+        console.log(utils.printLogTime() + " Disconnecting from " + client_info.mode + " IP: " + client_info.ip);
     });
-});
 
+});
 
 // --------------- Terminate cleanup ---------------
 function terminate_cleanup() {
-    console.log(printLogTime() + " Closing server");
+    console.log(utils.printLogTime() + " Closing server");
 
     if (io) {
+        console.log(utils.printLogTime() + " Closing Socket.IO");
         // Socket IO closing
         io.close();
+    }
 
+    if (db) {
+        console.log(utils.printLogTime() + " Closing DB");
         // MongoDB closing
         db.close();
-        process.exit();
     }
+
+    process.exit();
 }
 
 // CTRL-C
