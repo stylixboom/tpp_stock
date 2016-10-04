@@ -46,9 +46,10 @@ module.exports.unit = mongoose.model('unit', {
 
 module.exports.user = mongoose.model('user', {
 	id: Integer,
+	name: String,
+	email: String,
 	username: String,
 	password: String,					// Hashed password
-	name: String,
 	identity: String,
 	address: String,
 	description: String,
