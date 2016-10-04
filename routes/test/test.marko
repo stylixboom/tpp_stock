@@ -1,6 +1,6 @@
-<!DOCTYPE html>
-html lang="en"
-    head
-        title - Marko Templating Engine
-    body
-        h1 - Hello ${data.title}!!Hahaha
+<layout-use("../default-layout.marko") show-header=true>
+    <layout-put into="title">Marko Templating Engine</layout-put>
+    <layout-put into="body">
+        h1 - Hello ${data.title}!!Hahahass
+    </layout-put>
+</layout-use>

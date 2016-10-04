@@ -8,7 +8,7 @@ var template = require('marko').load(templatePath);
 console.log("read test.js");
 router.get('/', function (req, res) {
     console.log("test");
-    template.render({ title: 'Express' }, res);
+    template.render({ title: 'Test' }, res);
 });
 
 module.exports = router;
