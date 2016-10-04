@@ -4,7 +4,7 @@ var utils = require('./utils.js');
 // --------------- MongoDB initialize ---------------
 var DB_ADDR = '10.128.0.215';
 var DB_PORT = '27017';
-var DB_NAME = 'tpp_stock';  // Database name
+var DB_NAME = 'tpp_stock'; // Database name
 
 var db = require('monk')((DB_ADDR + ":" + DB_PORT + '/' + DB_NAME), function (err) {
     if (err) {
@@ -16,20 +16,104 @@ var db = require('monk')((DB_ADDR + ":" + DB_PORT + '/' + DB_NAME), function (er
     }
 });
 
-// --------------- Express API server initialize ---------------
+// --------------- Express server parameters ---------------
 var listening_ip = '0.0.0.0';
 var listening_port = 8080;
 
 var express = require('express');
 var app = express();
 
+// Express configure
+var logger = require('morgan');
+app.use(logger('dev'));
+var bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+// --------------- Configure passport ----------------
+// **** Passport and authentication need to be set before all routes
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+// initialize
+app.use(passport.initialize());
+app.use(passport.session());
+
+// -------------- Logged in user Instance ---------------
+app.post('/login',
+    passport.authenticate('local', {
+        successRedirect: '/loginSuccess',
+        failureRedirect: '/loginFailure'
+    })
+);
+
+app.get('/loginFailure', function (req, res, next) {
+    res.send('Failed to authenticate');
+});
+
+app.get('/loginSuccess', function (req, res, next) {
+    res.send('Successfully authenticated');
+});
+
+// serialize/deserialize user instance
+passport.serializeUser(function (user, done) {
+    done(null, user);
+});
+
+passport.deserializeUser(function (user, done) {
+    done(null, user);
+});
+
+var bCrypt = require('bcrypt-nodejs');
+var isValidPassword = function (user, password) {
+    return bCrypt.compareSync(password, user.password);
+}
+
+
+// -------------- User query/authen with MongoDB ---------------
+var mongoose = require('mongoose/');
+mongoose.connect('mongodb://localhost/tpp_db');
+// Schema and model
+var Schema = mongoose.Schema;
+var UserDetail = new Schema({
+    username: String,
+    password: String
+}, {
+        collection: 'userInfo'
+    });
+var UserDetails = mongoose.model('userInfo', UserDetail);
+
+// Authentication logic with passport
+passport.use(new LocalStrategy(function (username, password, done) {
+    process.nextTick(function () {
+        UserDetails.findOne({
+            'username': username,
+        }, function (err, user) {
+            if (err) {
+                return done(err);
+            }
+
+            if (!user) {
+                return done(null, false);
+            }
+
+            if (user.password != password) {
+                return done(null, false);
+            }
+
+            return done(null, user);
+        });
+    });
+}));
+
+// --------------- Express API server initialize ---------------
 var server = app.listen(process.env.SERV_PORT || listening_port, process.env.SERV_IP || listening_ip, function () {
     console.log(utils.printLogTime() + ' TPP stock management service is now listening on %s:%s', server.address().address, server.address().port);
 });
 
+/*
 // Routes hot-reload
 const path = require('path');
-var templatesDir = __dirname + '/routes/test';
+var templatesDir = __dirname + '/routes';
 require('marko/hot-reload').enable();
 require('fs').watch(templatesDir, function (event, filename) {
     if (/\.marko$/.test(filename)) {
@@ -42,49 +126,23 @@ require('fs').watch(templatesDir, function (event, filename) {
         require('marko/hot-reload').handleFileModified(templatePath);
     }
 });
+*/
 
-// Express configure
-var logger = require('morgan');
-app.use(logger('dev'));
-var bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({ extended: true }));
+// --------------- Configure routes ---------------  
+// Generic
+var route = __dirname + '/routes';
+app.use('/public', express.static(__dirname + '/routes/public'));
 
-app.use('/', express.static(__dirname + '/routes/home'));
-
-// Configure routes
-var test = require(templatesDir + '/test');
+// Specific
+var home = require(route + '/home/home');
+var login = require(route + '/login/login');
+var register = require(route + '/register/register');
+var test = require(route + '/test/test');
+app.use('/', home);
+app.use('/login', login);
+app.use('/register', register);
 app.use('/test', test);
 
-// --------------- UserDB ----------------
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://' + DB_ADDR + ":" + DB_PORT + '/' + DB_NAME);
-
-// Configuring Passport
-var passport = require('passport');
-var expressSession = require('express-session');
-app.use(expressSession({
-    secret: 'atppstockservicesecretkey',
-    resave: true,
-    saveUninitialized: true
-}));
-app.use(passport.initialize());
-app.use(passport.session());
-
-// -------------- Logged in user Instance ---------------
-passport.serializeUser(function (user, done) {
-    done(null, user._id);
-});
-
-passport.deserializeUser(function (id, done) {
-    User.findById(id, function (err, user) {
-        done(err, user);
-    });
-});
-
-var bCrypt = require('bcrypt-nodejs');
-var isValidPassword = function (user, password) {
-    return bCrypt.compareSync(password, user.password);
-}
 
 // --------------- Hashmap initialize ---------------
 var HashMap = require('hashmap');
