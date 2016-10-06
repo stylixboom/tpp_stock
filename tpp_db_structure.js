@@ -4,7 +4,7 @@
 	Date: 4 October 2016 (started from 27 September 2016)
 */
 
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'); // Probably it just reuses the current mongoose object
 var Schema = mongoose.Schema;
 
 module.exports.stock = mongoose.model('stock', new Schema({
@@ -61,7 +61,9 @@ module.exports.user = mongoose.model('user', new Schema({
 	password: String,					// Hashed password
 	identity: String,
 	address: String,
-	description: String,
+	description: String,	
+	created: Date,
+	event: String,
 	activated: Boolean					// Activated/Revoked
 }, {
 	collection: 'user'
