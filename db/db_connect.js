@@ -1,5 +1,5 @@
 // --------------- Generic function -----------------
-var utils = require('./utils.js');
+var utils = require(process.env.NODE_PATH + '/utils.js');
 
 var dbConfig = require('./db_config.js');
 var mongoose = require('mongoose');
