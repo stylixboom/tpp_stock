@@ -24,24 +24,38 @@ var bCrypt = require('bcrypt-nodejs');
 /* POST register page. */
 router.post('/', function (req, res) {
     console.log("registering");
+    TPP_data_model.user.findOne({ 'username': req.body.username }, function (err, user) {
+        // In case of any error return
+        if (err) {
+            console.log('Error in registration: ' + err);
+            res.send('Error in registration: ' + err);
+        }
+        // already exists
+        if (user) {
+            console.log('User already exists');
+            res.send('User already exists');
+        } else {
+            var new_user = new TPP_data_model.user({
+                name: req.body.name,
+                username: req.body.username,
+                password: bCrypt.hashSync(req.body.password),
+                identity: req.body.identity,
+                address: req.body.address,
+                created: new Date(),
+                event: utils.printLogTime() + " Account created" + os.EOL,
+                activated: true,
+            });
 
-    var new_user = new TPP_data_model.user({
-        name: req.body.name,
-        username: req.body.username,
-        password: bCrypt.hashSync(req.body.password),
-        identity: req.body.identity,
-        address: req.body.address,
-        created: new Date(),
-        event: utils.printLogTime() + " Account created" + os.EOL,
-        activated: true,
+            new_user.save(function (err) {
+                if (err) {
+                    console.log('Error in Saving user: ' + err);
+                    throw err;
+                }
+                console.log('User ' + new_user.name + ' registered successfully!');
+                res.send('User ' + new_user.name + ' registered successfully!');
+            });
+        }
     });
-
-    new_user.save(function (err) {
-        if (err) throw err;
-        console.log('User ' + new_user.name + ' saved successfully!');
-    });
-
-    template.render({ title: 'register' }, res);
 });
 
 module.exports = router;
