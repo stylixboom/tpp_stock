@@ -21,8 +21,9 @@ app.use(logger('dev'));
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Configure Route home path
-var route = process.env.NODE_PATH + '/routes';
+// Configure internal directories
+var api = process.env.NODE_PATH + '/api';
+var ui = process.env.NODE_PATH + '/ui';
 
 // This moddleware can protect the route
 app.use(function timeLog(req, res, next) {
@@ -31,7 +32,7 @@ app.use(function timeLog(req, res, next) {
 });
 
 // --------------- Passport authentication ---------------
-var pass_authen = require(route + '/login/passport_authen.js');
+var pass_authen = require(ui + '/login/passport_authen.js');
 app.use('/', pass_authen);
 
 // --------------- Express API server initialize ---------------
@@ -40,22 +41,25 @@ var server = app.listen(process.env.SERV_PORT || listening_port, process.env.SER
 });
 
 // --------------- Configure routes ---------------  
-app.use('/public', express.static(process.env.NODE_PATH + '/routes/public'));
+// ---- API
+var api_register = require(api + '/register/register');
+app.use('/api/register', api_register);
 
-// Specific
-var pass_authen = require(route + '/login/passport_authen.js');
-var home = require(route + '/home/home');
-var login = require(route + '/login/login');
-var register = require(route + '/register/register');
-var test = require(route + '/test/test');
-app.use('/', home);
-app.use('/login', login);
-app.use('/register', register);
-app.use('/test', test);
+// ---- UI
+var ui_home = require(ui + '/home/home');
+var ui_login = require(ui + '/login/login');
+var ui_register = require(ui + '/register/register');
+var ui_test = require(ui + '/test/test');
+app.use('/public', express.static(ui + '/public'));
+app.use('/', ui_home);
+app.use('/login', ui_login);
+app.use('/register', ui_register);
+app.use('/test', ui_test);
+
 
 // --------------- Socket.IO ---------------
 var io = require('socket.io')(server);
-// Event implementations
+// Socket.IO events implementation
 require(process.env.NODE_PATH + '/socket.io/event')(io);
 
 // --------------- Terminate cleanup ---------------
