@@ -39,8 +39,8 @@ var server = app.listen(process.env.SERV_PORT || listening_port, process.env.SER
 // --------------- Configure routes ---------------  
 
 // ---- API
-var api_authen = require(api + '/authen/passport.js');
-var api_register = require(api + '/register/register');
+var api_authen = require(api + '/account/authen.js');
+var api_register = require(api + '/account/register');
 app.use('/api/authen', api_authen);
 app.use('/api/register', api_register);
 
