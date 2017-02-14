@@ -10,10 +10,10 @@ router.use(passport.initialize());
 router.use(passport.session());
 
 // -------------- Logged in user Instance ---------------
-router.post('/login',
+router.post('/',
     passport.authenticate('local', {
-        successRedirect: '/loginSuccess',
-        failureRedirect: '/loginFailure'
+        successRedirect: '/api/authen/loginSuccess',
+        failureRedirect: '/api/authen/loginFailure'
     })
 );
 

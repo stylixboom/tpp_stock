@@ -27,13 +27,9 @@ var ui = process.env.NODE_PATH + '/ui';
 
 // This moddleware can protect the route
 app.use(function timeLog(req, res, next) {
-    console.log('------------------- Time: ', Date.now());
+    console.log('Catched routes: ', utils.printLogTime());
     next();
 });
-
-// --------------- Passport authentication ---------------
-var pass_authen = require(ui + '/login/passport_authen.js');
-app.use('/', pass_authen);
 
 // --------------- Express API server initialize ---------------
 var server = app.listen(process.env.SERV_PORT || listening_port, process.env.SERV_IP || listening_ip, function () {
@@ -41,8 +37,11 @@ var server = app.listen(process.env.SERV_PORT || listening_port, process.env.SER
 });
 
 // --------------- Configure routes ---------------  
+
 // ---- API
+var api_authen = require(api + '/authen/passport.js');
 var api_register = require(api + '/register/register');
+app.use('/api/authen', api_authen);
 app.use('/api/register', api_register);
 
 // ---- UI

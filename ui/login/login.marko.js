@@ -32,7 +32,7 @@ function create(__helpers) {
               into: "body",
               layout: __layoutHelper,
               renderBody: function renderBody(out) {
-                out.w(" <button class=\"btn btn-primary\" data-toggle=\"modal\" data-target=\"#login-modal\">Login</button> <div class=\"modal fade\" id=\"login-modal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\" aria-hidden=\"true\" style=\"display: none;\"> <div class=\"modal-dialog\"> <div class=\"inputmodal-container\"> <h1>Login to Your Account</h1><br> <form action=\"/login\" method=\"post\"> <input type=\"text\" name=\"username\" placeholder=\"Username\"> <input type=\"password\" name=\"password\" placeholder=\"Password\"> <input type=\"submit\" name=\"login\" class=\"login inputmodal-submit\" value=\"Login\"> </form> <div class=\"login-help\"> <a href=\"#\">Register</a> - <a href=\"#\">Forgot Password</a> </div> </div> </div> </div> ");
+                out.w(" <button class=\"btn btn-primary\" data-toggle=\"modal\" data-target=\"#login-modal\">Login</button> <div class=\"modal fade\" id=\"login-modal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\" aria-hidden=\"true\" style=\"display: none;\"> <div class=\"modal-dialog\"> <div class=\"inputmodal-container\"> <h1>Login to Your Account</h1><br> <form action=\"/api/authen\" method=\"post\"> <input type=\"text\" name=\"username\" placeholder=\"Username\"> <input type=\"password\" name=\"password\" placeholder=\"Password\"> <input type=\"submit\" name=\"login\" class=\"login inputmodal-submit\" value=\"Login\"> </form> <div class=\"login-help\"> <a href=\"#\">Register</a> - <a href=\"#\">Forgot Password</a> </div> </div> </div> </div> ");
               }
             }, out);
 
